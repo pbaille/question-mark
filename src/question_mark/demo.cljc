@@ -29,24 +29,25 @@
 (is :ok (? (pos? 1) :ok :ko))
 (is :ko (? (pos? 0) :ok :ko))
 
-(let [m {:a 2 :b 3}]
-  (is 4
-      (? [a (get m :a)]
-         (+ a a)
-         :fail))
+(def m {:a 2 :b 3})
 
-  (is 5
-      (? [a (get m :a)
-          b (get m :b)]
-         (+ a b)
-         :fail))
+(is 4
+    (? [a (get m :a)]
+       (+ a a)
+       :fail))
 
-  (is 5
-      (? [{:keys [a b]} m]
-         (+ a b)))
+(is 5
+    (? [a (get m :a)
+        b (get m :b)]
+       (+ a b)
+       :fail))
 
-  (isnt (? [{:keys [a c]} m]
-           (+ a c))))
+(is 5
+    (? [{:keys [a b]} m]
+       (+ a b)))
+
+(isnt (? [{:keys [a c]} m]
+         (+ a c)))
 
 
 (let [f (fn [x]

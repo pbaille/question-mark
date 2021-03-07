@@ -244,11 +244,12 @@ With three arguments `?` behave like `if`
 It can also bind some value like `if-let` does
 
 ```clojure
-(let [m {:a 2 :b 3}]
-  (is 4
-      (? [a (get m :a)]
-         (+ a a)
-         :fail)))
+(def m {:a 2 :b 3}) ; used in following examples
+
+(is 4
+    (? [a (get m :a)]
+       (+ a a)
+       :fail))
 ```
 
 But the `?` macro can deal with several bindings (`if-let` do not).
