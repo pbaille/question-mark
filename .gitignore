@@ -4,3 +4,5 @@
 /.shadow-cljs/
 /.nrepl-port
 /resources/public/js/
+/pom.xml
+/target/

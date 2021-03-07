@@ -6,7 +6,7 @@
 
     (do :errors
 
-        (defn errors_strict-binding
+        (defn- errors_strict-binding
           "in strict mode, runtime expression are throwm when we bind a symbol to nil"
           [name code cljs]
           `(throw (new ~(if cljs 'js/Error 'java.lang.Exception)
@@ -20,36 +20,36 @@
         ;; - ! (:strict mode) meaning that the we need a runtime error if the symbol binds to nil
         ;; - _ (:ignored mode) meaning that we don't care about the symbol's bound value
 
-        (defn binding-symbol_generated? [x]
+        (defn- binding-symbol_generated? [x]
           (re-matches #"^((vec)|(seq)|(first)|(map))__[0-9]+$"
                       (name x)))
 
-        (defn binding-symbol_pure-prefix? [x]
+        (defn- binding-symbol_pure-prefix? [x]
           (contains? #{"!" "?"} (name x)))
 
-        (defn binding-symbol_mode [x]
+        (defn- binding-symbol_mode [x]
           (case (subs (name x) 0 1)
             "?" :optional
             "!" :strict
             nil))
 
-        (defn binding-symbol_unprefixed? [x]
+        (defn- binding-symbol_unprefixed? [x]
           (and (symbol? x)
                (not (binding-symbol_mode x))))
 
-        (defn binding-symbol_unprefixed [x]
+        (defn- binding-symbol_unprefixed [x]
           (cond
             (binding-symbol_pure-prefix? x) nil
             (binding-symbol_mode x) (symbol (subs (name x) 1))
             :else x))
 
-        (defn binding-symbol_ignored? [x]
+        (defn- binding-symbol_ignored? [x]
           (or (binding-symbol_pure-prefix? x)
               (-> (binding-symbol_unprefixed x)
                   name first (= \_))
               nil))
 
-        (defn binding-symbol_parse [x]
+        (defn- binding-symbol_parse [x]
           {:mode      (binding-symbol_mode x)
            :name      (binding-symbol_unprefixed x)
            :ignored   (binding-symbol_ignored? x)
@@ -57,7 +57,7 @@
 
     (do :compilation
 
-        (defn expand-case
+        (defn- expand-case
 
           [{:as   opts
             :keys [bindings expr fail cljs]}]
@@ -83,7 +83,7 @@
                     :strict `(if-let [~name ~b2] ~then ~error)
                     :short `(if-let [~name ~b2] ~then (~fail))))))
 
-        (defn bindings_normalize-map-pattern
+        (defn- bindings_normalize-map-pattern
           [{:as pattern :keys [keys]}]
           (if keys
             (->> keys
@@ -91,7 +91,7 @@
                  (into (dissoc pattern :keys)))
             pattern))
 
-        (defn bindings_normalize
+        (defn- bindings_normalize
           "in the map destructuring pattern, prefixed symbols are allowed,
            if those occurs in the :keys vector we have to preprocess it"
           [bindings]
@@ -102,7 +102,7 @@
                             pattern) expression]))
                (into [])))
 
-        (defn compile-case
+        (defn- compile-case
           [{:as opts :keys [bindings expr cljs]}]
           (let [[bindings expr]
                 (if (vector? bindings)
@@ -111,7 +111,7 @@
             (expand-case (assoc opts :bindings bindings
                                      :expr expr))))
 
-        (defn compile-bindings
+        (defn- compile-bindings
           [{:as opts :keys [cases symbols default]}]
           (->> (mapcat (fn [[sym next-sym] [bindings expr]]
                          (let [opts (assoc opts :bindings bindings :expr expr :fail next-sym)]
@@ -120,11 +120,11 @@
                        cases)
                (into [(last symbols) `(fn [] ~default)])))
 
-        (defn cases-symbols
+        (defn- cases-symbols
           ([] (map #(gensym (str "case_" % "_")) (range)))
           ([n] (take n (cases-symbols))))
 
-        (defn parse [form]
+        (defn- parse [form]
           (let [[cases default]
                 (if (even? (count form))
                   [form nil]
@@ -132,7 +132,7 @@
             {:cases   (partition 2 cases)
              :default default}))
 
-        (defn compile
+        (defn- compile
           [form cljs?]
           (let [{:as parsed :keys [cases default]} (parse form)
                 symbols (cases-symbols (inc (count cases)))
@@ -141,7 +141,7 @@
 
             `(let ~bindings ~return)))
 
-        (defn simple-form
+        (defn- simple-form
           "in simple cases, where we can map directly to regular clojure.core's macros,
           we want don't want to do unescessary things,
           this function emit a normal `if`, `when`, `if-let`, `when-let` or `cond` form if possible."
