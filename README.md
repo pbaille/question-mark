@@ -221,7 +221,7 @@ We could imagine a `cond-let` macro which would be handy.
 
 But this macro does not exist in `clojure.core`.
 
-If you try to implement it you may realize that it is not as easy at it seems. Nevertheless there is several libraries that implement it.
+If you try to implement it you may realize that it is not as easy at it seems. Nevertheless there is several libraries that implement it ([A](https://github.com/Engelberg/better-cond), [B](https://github.com/walmartlabs/cond-let)).
 
 Those past years I’ve came up with several version of macros similar to `cond-let`. But only recently I came up with a version that do it correctly in addition to extend it further.
 
@@ -230,7 +230,7 @@ Those past years I’ve came up with several version of macros similar to `cond-
 In fact if one thinks of it, we do not really need a different name for `if`, `if-let` and `cond`.
 Those three macros do control flow in only sligthly differently maners.
 Their syntaxes do not overlap, so we can safely use only one macro to cover the three behaviors.
-Some lisps (like arc) do have an if form that can be used like a `cond` for instance.
+Some lisps (like [arc](https://www.wikiwand.com/en/Arc_(programming_language))) do have an if form that can be used like a `cond` for instance.
 
 This macro could be named `?` because we type it so often and because `if` cannot be overriden (being a special form)
 
