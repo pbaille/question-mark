@@ -238,9 +238,12 @@ Some lisps (like [arc](https://www.wikiwand.com/en/Arc_(programming_language))) 
 
 This macro could be named `?` because we type it so often and because `if` cannot be overriden (being a special form)
 
-With three arguments `?` behave like `if`
+With two or three arguments `?` behaves like `if`
 
 ```clojure
+(is :ok (? (pos? 1) :ok))
+(isnt (? (pos? 0) :ok))
+
 (is :ok (? (pos? 1) :ok :ko))
 (is :ko (? (pos? 0) :ok :ko))
 ```

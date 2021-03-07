@@ -26,6 +26,9 @@
                        (str '~x "\nshould be an error.")))))
 
 
+(is :ok (? (pos? 1) :ok))
+(isnt (? (pos? 0) :ok))
+
 (is :ok (? (pos? 1) :ok :ko))
 (is :ko (? (pos? 0) :ok :ko))
 

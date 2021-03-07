@@ -171,55 +171,186 @@
 
     (defmacro ?
       "
-## when(ish)
+      With two or three arguments `?` behaves like `if`
 
-(= (? (pos? 1) :ok)
-   :ok)
+      ```clojure
+      (is :ok (? (pos? 1) :ok))
+      (isnt (? (pos? 0) :ok))
 
-(= (? (pos? -1) :ok)
-   nil)
+      (is :ok (? (pos? 1) :ok :ko))
+      (is :ko (? (pos? 0) :ok :ko))
+      ```
 
-## like if
+      It can also bind some value like `if-let` does
 
-(= (? (pos? 0) :ok :ko)
-   :ko)
+      ```clojure
+      (def m {:a 2 :b 3}) ; used in following examples
 
-## cond(ish)
+      (is 4
+          (? [a (get m :a)]
+             (+ a a)
+             :fail))
+      ```
 
-(let [f (fn [x]
+      But the `?` macro can deal with several bindings (`if-let` do not).
+      I need to check but I'm not sure that existing clojure’s implementations of `cond-let` can do that properly.
+
+      ```clojure
+      (is 5
+          (? [a (get m :a)
+              b (get m :b)]
+             (+ a b)
+             :fail))
+      ```
+
+      We can destructure
+
+      ```clojure
+      (is 5
+          (? [{:keys [a b]} m]
+             (+ a b)))
+      ```
+
+      But this time it fails if an inner binding is `nil`
+
+      ```clojure
+      (isnt (? [{:keys [a c]} m]
+               (+ a c)))
+      ```
+
+      The `?` macro can be used like `cond` too
+
+      ```clojure
+      (let [f (fn [x]
+                (? (pos? x) [:pos x]
+                   (neg? x) [:neg x]
+                   :zero))] ;; unlike cond we do not need the :else keyword before the default case
+
+        (is (f -1)
+            [:neg -1])
+        (is (f 3)
+            [:pos 3])
+        (is (f 0)
+            :zero))
+      ```
+
+      Even better, it can be used like `cond-let`
+
+      ```clojure
+      (let [f (fn [m]
+                (?
+                  ;; case 1
+                  ;; if m contains? a :foo key we bind its value to the symbol 'foo and return it
+                  [foo (:foo m)] foo
+                  ;; case 2
+                  [_ (:baz m) ;; checking that m is containing a :baz key
+                   bar (:bar m)] ;; if yes we try to bind the :bar value of m to the symbol 'bar
+                  ;;then return it
+                  bar
+                  ;; bottom case
+                  [:fails m]))]
+
+        (is 1 (f {:foo 1 :bar 2}))
+        (is 2 (f {:bar 2 :baz 3}))
+        (is [:fails {:some :thing}]
+            (f {:some :thing})))
+      ```
+
+      Those two flavors of `let`/`cond` (`if-let`/`cond-let`) can be mixed together
+
+      ```clojure
+      (defn mix-test [x]
+        (? ;; the first case do not bind its return value (like if)
+          (number? x)
           (? (pos? x) [:pos x]
              (neg? x) [:neg x]
-             :zero))]
-  (and (= (f 0) :zero)
-       (= (f 1) [:pos 1])
-       (= (f -1) [:neg 1])))
+             :zero)
+          ;; the second case is like a multi binding if-let, it tries to bind two values
+          [a (get x :a)
+           b (get x :b)] (+ a b)
+          ;; if those two cases have failed we are printing something
+          (println \"mix-test has failed\")
+    ))
+```
 
-## when-let(ish)
+In fact if you think about it you realize that the `?` macro can behave pretty much like `let` .
 
-(? [a (get x :a)]
-   (+ a a))
+All `let` forms that do not bind anything to `nil` can be replaced by the `?` macro
 
-support several bindings:
-
-(? [a (get x :a)
-    b (get x :b)]
+```clojure
+(? [a 1 b 2]
    (+ a b))
+```
 
-it can destructure but will check inner bindings (unlike when-let)
+This is fine but sometimes I like to be able to bind things to `nil`!
+In fact the `?` macro have a way to do this
 
-(? [{:keys [a b]} x]
-   (+ a b))
+```clojure
+(? [m {:a 1 :b 2}
+    a (get m :a)
+    ?c (get m :c)] ;; c is prefixed by ? meaning that is can be falsy
+   (? c [:a+c (+ a c)]
+      [:only :a a]))
+```
 
-## if-let
+In fact those prefixed symbols can be used also in destructuring patterns
 
-(? [a (get x :a)]
-   (+ a a)
-   :no-a-key)
+```clojure
+(? [{:keys [a ?c]} {:a 1 :b 2}]
+   (? c [:a+c (+ a c)]
+      [:only :a a]))
+```
 
-## cond-let
+So we cover the whole `let` scope now
 
-()
+There is another thing that can be desirable in our programs.
+It is to throw meaningful runtime errors, in clojure we sometimes have to chase `nil` in a complex execution.
+Which is not always easy nor pleasant.
+
+The `?` macro is letting you prefix bindings that can never fail with `!`
+
+```clojure
+'(? [!a (get {} :a)] :ok)
+```
+
+prints
+
+```
+strict binding failure:
+a
+(get {} :a)
+```
+
+_
+
+```clojure
+(let [f (fn [m]
+          (? [!a (get m :a) ;; m has to have an :a key
+              b (get m :b)] ;; then we try to find a :b key
+             ;; if the :b key exists in m we return a and b
+             [:a-and-b a b]
+             ;; else we fail
+             :fail))]
+
+  (is (f {:a 1 :b 2})
+      [:a-and-b 1 2])
+
+  (is (f {:a 1})
+      :fail)
+
+  (throws (f {:c 3})))
+```
+
+Like the ‘?’ prefix the ‘!’ prefix can be used in destructurations
+
+```clojure
+(let [m {:a 1 :b 2}]
+  (? [{:keys [!a b ?c]} m]
+     (list a b c)
+     :fail))
+```
 "
+
       [& bod]
       (or (simple-form bod)
           (compile bod (boolean (:ns &env))))))
