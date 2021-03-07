@@ -1,4 +1,5 @@
 
+[![Clojars Project](https://img.shields.io/clojars/v/pbaille/question-mark.svg)](https://clojars.org/pbaille/question-mark)
 ![cljdoc badge](https://cljdoc.org/badge/pbaille/question-mark)
 
 # Context and Motivation
