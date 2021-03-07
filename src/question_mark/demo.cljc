@@ -1,4 +1,4 @@
-(ns question-mark.demo
+(ns ^:no-doc question-mark.demo
   (:require [question-mark.core :refer [?]])
   #?(:cljs (:require-macros [question-mark.demo :refer [is isnt throws]])))
 
