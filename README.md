@@ -1,6 +1,6 @@
 # Context and Motivation
 
-If you are familiar with clojure, you can skip this section.
+If you are familiar with clojure, you can [skip](https://github.com/pbaille/question-mark#introducing-the--macro) this section.
 
 ## `clojure.core`
 
