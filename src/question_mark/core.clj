@@ -1,6 +1,6 @@
-
 (ns question-mark.core
-  (:refer-clojure :exclude [compile]))
+  (:refer-clojure :exclude [compile])
+  (:require cljs.core))
 
 (do :impl
 
@@ -103,21 +103,22 @@
                (into [])))
 
         (defn compile-case
-          [{:as opts :keys [bindings expr]}]
+          [{:as opts :keys [bindings expr cljs]}]
           (let [[bindings expr]
                 (if (vector? bindings)
-                  [(destructure (bindings_normalize bindings)) expr]
+                  [((if cljs cljs.core/destructure clojure.core/destructure) (bindings_normalize bindings)) expr]
                   [[(gensym "_check-") bindings] expr])]
             (expand-case (assoc opts :bindings bindings
                                      :expr expr))))
 
         (defn compile-bindings
-          [{:as opts :keys [cases symbols]}]
-          (mapcat (fn [[sym next-sym] [bindings expr]]
-                    (let [opts (assoc opts :bindings bindings :expr expr :fail next-sym)]
-                      [sym `(fn [] ~(compile-case opts))]))
-                  (reverse (partition 2 1 symbols))
-                  cases))
+          [{:as opts :keys [cases symbols default]}]
+          (->> (mapcat (fn [[sym next-sym] [bindings expr]]
+                         (let [opts (assoc opts :bindings bindings :expr expr :fail next-sym)]
+                           [sym `(fn [] ~(compile-case opts))]))
+                       (reverse (partition 2 1 symbols))
+                       cases)
+               (into [(last symbols) `(fn [] ~default)])))
 
         (defn cases-symbols
           ([] (map #(gensym (str "case_" % "_")) (range)))
@@ -136,12 +137,9 @@
           (let [{:as parsed :keys [cases default]} (parse form)
                 symbols (cases-symbols (inc (count cases)))
                 bindings (compile-bindings (assoc parsed :symbols symbols :cljs cljs?))
-                bindings (if default
-                           (list* (last symbols) `(fn [] ~default) bindings)
-                           bindings)]
+                return (list (-> bindings butlast last))]
 
-            `(let ~(vec bindings)
-               ~(list (-> bindings butlast last)))))
+            `(let ~bindings ~return)))
 
         (defn simple-form
           "in simple cases, where we can map directly to regular clojure.core's macros,
@@ -236,5 +234,4 @@
             (user {:full-name "Pierre Baille"})
             (user {:first-name "Pierre" :last-name "Baille"})
             {:first-name "Pierre", :last-name "Baille", :full-name "Pierre Baille"}))
-
 

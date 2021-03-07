@@ -1,4 +1,6 @@
-# Let it flow
+# Context and Motivation
+
+If you are familiar with clojure, you can skip this section.
 
 ## `clojure.core`
 
@@ -45,7 +47,7 @@ those are functions that return a boolean, often suffixed by a '?' in clojure.co
    (and false true))
 ```
 
-### `if` and friends
+### Control macros (`if` and friends)
 
 ```clojure
 
