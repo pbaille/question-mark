@@ -1,3 +1,6 @@
+
+[cljdoc](https://cljdoc.org/badge/pbaille/question-mark)
+
 # Context and Motivation
 
 If you are familiar with clojure, you can [skip](https://github.com/pbaille/question-mark#introducing-the--macro) this section.
