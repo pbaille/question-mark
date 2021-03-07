@@ -1,0 +1,10 @@
+{:deps {:aliases [:shadow]}
+ :nrepl {:port 9999}
+ :http {:port 8081}
+ :dev-http {3449 "resources/public/"}
+ :socket-repl {:port 9000}
+ :builds
+ {:app {:target :browser
+        :output-dir "resources/public/js"
+        :asset-path "/js"
+        :modules {:main {:entries [question_mark.core]}}}}}
