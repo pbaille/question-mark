@@ -417,24 +417,29 @@ Like the ‘?’ prefix the ‘!’ prefix can be used in destructurations
 # Under the hood
 
 There is several ways to compile the `?` macro.
-I will try to expose the different techniques that I tryed.
+I will try to expose the different techniques that I tried.
 
 For trivial cases that maps directly to `if`, `when`, `if-let` or `when-let` we can just detect them and just replace the `?` by the corresponding clojure.core's macro.
 
 ```clojure
-(= (macroexpand-1 '(? (pos? x) :ok))
+(= (macroexpand-1 
+    '(? (pos? x) :ok))
    '(when (pos? x) :ok))
 
-(= (macroexpand-1 '(? (pos? x) :ok :ko))
+(= (macroexpand-1 
+    '(? (pos? x) :ok :ko))
    '(if (pos? x) :ok :ko))
 
-(= (macroexpand-1 '(? [xs (seq x)] (count x)))
+(= (macroexpand-1 
+    '(? [xs (seq x)] (count x)))
    '(when-let [xs (seq x)] (count xs)))
 
-(= (macroexpand-1 '(? [xs (seq x)] (count x) :not-seq))
+(= (macroexpand-1 
+    '(? [xs (seq x)] (count x) :not-seq))
    '(if-let [xs (seq x)] (count x) :not-seq))
 
-(= (macroexpand-1 '(? (pos? x) :pos (neg? x) :neg :zero))
+(= (macroexpand-1 
+    '(? (pos? x) :pos (neg? x) :neg :zero))
    '(cond (pos? x) :pos 
           (neg? x) :neg 
           :else :zero))
