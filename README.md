@@ -1,5 +1,5 @@
 
-[cljdoc](https://cljdoc.org/badge/pbaille/question-mark)
+![cljdoc badge](https://cljdoc.org/badge/pbaille/question-mark)
 
 # Context and Motivation
 
