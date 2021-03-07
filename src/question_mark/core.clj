@@ -170,68 +170,58 @@
 (do :api
 
     (defmacro ?
-      "the main control flow macro
-       kind of a mix of 'if 'if-let 'cond..."
+      "
+## when(ish)
+
+(= (? (pos? 1) :ok)
+   :ok)
+
+(= (? (pos? -1) :ok)
+   nil)
+
+## like if
+
+(= (? (pos? 0) :ok :ko)
+   :ko)
+
+## cond(ish)
+
+(let [f (fn [x]
+          (? (pos? x) [:pos x]
+             (neg? x) [:neg x]
+             :zero))]
+  (and (= (f 0) :zero)
+       (= (f 1) [:pos 1])
+       (= (f -1) [:neg 1])))
+
+## when-let(ish)
+
+(? [a (get x :a)]
+   (+ a a))
+
+support several bindings:
+
+(? [a (get x :a)
+    b (get x :b)]
+   (+ a b))
+
+it can destructure but will check inner bindings (unlike when-let)
+
+(? [{:keys [a b]} x]
+   (+ a b))
+
+## if-let
+
+(? [a (get x :a)]
+   (+ a a)
+   :no-a-key)
+
+## cond-let
+
+()
+"
       [& bod]
       (or (simple-form bod)
           (compile bod (boolean (:ns &env))))))
 
-
-
-(comment :blog-example
-
-         (? [!a x] (+ a a))
-
-         (defn user [x]
-           (? (string? x) (user {:full-name x})
-
-              [{:keys [first-name last-name]} x]
-              (assoc x :full-name (str first-name " " last-name))
-
-              [n (get x :full-name)
-               [first-name last-name] (clojure.string/split n #" ")]
-              (assoc x :first-name first-name :last-name last-name)
-
-              [:unvalid-user x]))
-
-         (defn user [x]
-
-           (let [case_3
-                 (fn [] [:unvalid-user x])
-
-                 case_2
-                 (fn []
-                   (if (string? x) (user {:full-name x}) (case_3)))
-
-                 case_1
-                 (fn []
-                   (let [map__5881 x]
-                     (let [map__5881
-                           (if (seq? map__5881)
-                             (clojure.lang.PersistentHashMap/create
-                              (seq map__5881))
-                             map__5881)]
-                       (if-let [first-name (get map__5881 :first-name)]
-                         (if-let [last-name (get map__5881 :last-name)]
-                           (assoc x :full-name (str first-name " " last-name))
-                           (case_2))
-                         (case_2)))))
-
-                 case_0
-                 (fn []
-                   (if-let [n (get x :full-name)]
-                     (let [vec__5882 (clojure.string/split n #" ")]
-                       (if-let [first-name (nth vec__5882 0 nil)]
-                         (if-let [last-name (nth vec__5882 1 nil)]
-                           (assoc x :first-name first-name :last-name last-name)
-                           (case_1))
-                         (case_1)))
-                     (case_1)))]
-
-             (case_0)))
-
-         (= (user "Pierre Baille")
-            (user {:full-name "Pierre Baille"})
-            (user {:first-name "Pierre" :last-name "Baille"})
-            {:first-name "Pierre", :last-name "Baille", :full-name "Pierre Baille"}))
 
