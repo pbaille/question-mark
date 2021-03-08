@@ -282,7 +282,7 @@ All `let` forms that do not bind anything to `nil` can be replaced by the `?` ma
 ```
 
 This is fine but sometimes I like to be able to bind things to `nil`!
-In fact the `?` macro have a way to do this
+In fact the `?` macro has a way to do this
 
 ```clojure
 (? [m {:a 1 :b 2}
@@ -292,7 +292,7 @@ In fact the `?` macro have a way to do this
       [:only :a a]))
 ```
 
-In fact those prefixed symbols can be used also in destructuring patterns
+Those prefixed symbols can be used also in destructuring patterns
 
 ```clojure
 (? [{:keys [a ?c]} {:a 1 :b 2}]
@@ -306,7 +306,7 @@ There is another thing that can be desirable in our programs.
 It is to throw meaningful runtime errors, in clojure we sometimes have to chase `nil` in a complex execution.
 Which is not always easy nor pleasant.
 
-The `?` macro is letting you prefix bindings that can never fail with `!`
+The `?` macro is letting you prefix bindings that can never be falsy with `!`
 
 ```clojure
 '(? [!a (get {} :a)] :ok)
@@ -319,8 +319,6 @@ strict binding failure:
 a
 (get {} :a)
 ```
-
-_
 
 ```clojure
 (let [f (fn [m]
