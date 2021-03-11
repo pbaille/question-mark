@@ -1,7 +1,7 @@
 
-(ns ^:no-doc question-mark.raw.demo
-  (:require [question-mark.raw.core :refer [?]])
-  #?(:cljs (:require-macros [question-mark.raw.demo :refer [is isnt throws]])))
+(ns ^:no-doc question-mark.stripped.demo
+  (:require [question-mark.stripped.core :refer [?]])
+  #?(:cljs (:require-macros [question-mark.stripped.demo :refer [is isnt throws]])))
 
 #?(:clj (do (defmacro is
               "arity 1: assert that given argument is truthy

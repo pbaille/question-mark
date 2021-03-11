@@ -1,11 +1,13 @@
-(ns question-mark.raw.core
+(ns question-mark.stripped.core
   (:require cljs.core))
 
-(defn- cases-symbols
-  "generating some symbols to hold cases lambdas"
+;; thunk : lambda of zero argument
+
+(defn- thunk-symbols
+  "generating symbols to hold case thunks"
   ([] (map #(gensym (str "case_" % "_")) (range))))
 
-(defn- expand-case
+(defn- compile-case
   [{:as   case
     :keys [test bindings return next]}]
   (let [cont (when next (list next))]
@@ -13,14 +15,14 @@
       test `(if ~test ~return ~cont)
       bindings (let [[b1 b2 & bs] bindings]
                  `(if-let [~b1 ~b2]
-                    ~(expand-case (assoc case :bindings bs))
+                    ~(compile-case (assoc case :bindings bs))
                     ~cont))
       :else return)))
 
 (defn- cases->thunks
   [cases]
   (mapv (fn [case]
-          (list (:symbol case) [] (expand-case case)))
+          (list (:symbol case) [] (compile-case case)))
         cases))
 
 (defn- normalize-body
@@ -40,7 +42,7 @@
              :test     (if-not (or bindings? bottom?) left)
              :bindings (when bindings? (destructure left))}))
         (partition 2 (normalize-body body))
-        (partition 2 1 (cases-symbols))))
+        (partition 2 1 (thunk-symbols))))
 
 (defn- emit-form
   [body destructure]

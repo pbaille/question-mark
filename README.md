@@ -41,9 +41,7 @@ those are functions that return a boolean, often suffixed by a '?' in clojure.co
    (or false true)
    (or nil true)
 
-   (and true true)
-   (and false true)
-   (and true nil))
+   (and true true))
 
 (= false
    (not true)
