@@ -230,7 +230,7 @@ Those past years I’ve came up with several version of macros similar to `cond-
 # Introducing the `?` macro.
 
 In fact if one thinks of it, we do not really need a different name for `if`, `if-let` and `cond`.
-Those three macros do control flow in only sligthly differently maners.
+Those three macros do control flow in only slightly different manners.
 Their syntaxes do not overlap, so we can safely use only one macro to cover the three behaviors.
 Some lisps (like [arc](https://www.wikiwand.com/en/Arc_(programming_language))) do have an if form that can be used like a `cond` for instance.
 
